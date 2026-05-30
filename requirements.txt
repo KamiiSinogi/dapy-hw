@@ -1,0 +1,2 @@
+dapy[ui] @ git+https://github.com/xdefago/dapy.git
+pytest>=9.0
