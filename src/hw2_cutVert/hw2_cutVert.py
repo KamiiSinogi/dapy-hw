@@ -8,6 +8,7 @@ from dapy.core import ProcessSet
 class CV_State(State):
     dfn: int | None = None
     min_dfn: int | None = None
+    min_child_dfn: int | None = None
     father: Pid | None = None
     neighbors: ProcessSet = field(default_factory=ProcessSet)
     count_children: int | None = None
@@ -40,6 +41,7 @@ class CV_Algorithm(Algorithm[CV_State]):
             pid = pid,
             dfn = 1 if pid==Pid(1) else None,
             min_dfn = 20070831,
+            min_child_dfn = 20070831,
             father = pid if pid==Pid(1) else None,
             neighbors = neighbor_set,
             count_children = 0,
@@ -74,6 +76,10 @@ class CV_Algorithm(Algorithm[CV_State]):
             
             case CV_BACK(_, sender):
                 new_min_dfn = min(old_state.min_dfn, event.depth)
+                if event.children:
+                    new_min_child_dfn = min(old_state.min_child_dfn, event.depth)
+                else:
+                    new_min_child_dfn = old_state.min_child_dfn
                 new_count_children = old_state.count_children + bool(event.children)
                 new_count_back = old_state.count_back - 1
                 if new_count_back !=0:
@@ -81,6 +87,7 @@ class CV_Algorithm(Algorithm[CV_State]):
                     new_neighbors = set(old_state.neighbors) - {node}
                     new_state = old_state.cloned_with(
                         min_dfn = new_min_dfn,
+                        min_child_dfn = new_min_child_dfn,
                         neighbors = new_neighbors,
                         count_children = new_count_children,
                         count_back = new_count_back)
@@ -88,11 +95,12 @@ class CV_Algorithm(Algorithm[CV_State]):
                 else:
                     new_state = old_state.cloned_with(
                         min_dfn = new_min_dfn,
+                        min_child_dfn = new_min_child_dfn,
                         count_children = new_count_children,
                         count_back = new_count_back)
                     if old_state.father != old_state.pid:
                         events = [CV_BACK(target=old_state.father, sender=old_state.pid, depth=new_min_dfn, children=True)]
-                        if new_min_dfn > old_state.dfn:
+                        if new_count_children > 0 and new_min_child_dfn >= old_state.dfn:
                             print(f"Process {old_state.pid} is a cut vertex.")
                     else:
                         events = []

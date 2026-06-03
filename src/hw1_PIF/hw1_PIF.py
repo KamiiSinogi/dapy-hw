@@ -57,7 +57,7 @@ class PIF_Algorithm(Algorithm[PIF_State]):
             
             case PIF_BACK(_, sender):
                 new_count_back = old_state.count_back - 1
-                if event.children == True:
+                if event.children:
                     new_children = old_state.children | {sender}
                 else:
                     new_children = old_state.children
