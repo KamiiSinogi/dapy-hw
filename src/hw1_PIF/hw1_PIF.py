@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Sequence
 
-from dapy.core import Algorithm, Event, Message, Pid, Signal, State
+from dapy.core import Algorithm, Message, Pid, Signal, State
 from dapy.core import ProcessSet
 
 
@@ -25,7 +24,7 @@ class PIF_GO(Message):
 
 @dataclass(frozen=True)
 class PIF_BACK(Message):
-    pass
+    children: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -50,21 +49,24 @@ class PIF_Algorithm(Algorithm[PIF_State]):
             
             case PIF_GO(_, sender):
                 if old_state.father is not None:
-                    return old_state, [PIF_BACK(target=sender, sender=old_state.pid)]
+                    return old_state, [PIF_BACK(target=sender, sender=old_state.pid, children=False)]
+                new_state = old_state.cloned_with(father=sender)
                 events = [PIF_GO(target=node, sender=old_state.pid) 
                     for node in old_state.neighbors]
-                new_state = old_state.cloned_with(father=sender)
                 return new_state, events
             
             case PIF_BACK(_, sender):
                 new_count_back = old_state.count_back - 1
-                new_children = old_state.children | {sender}
+                if event.children == True:
+                    new_children = old_state.children | {sender}
+                else:
+                    new_children = old_state.children
                 new_state = old_state.cloned_with(
                     children = new_children,
                     count_back = new_count_back)
                 if new_count_back == 0:
                     if old_state.father != old_state.pid:
-                        return new_state, [PIF_BACK(target=old_state.father, sender=old_state.pid)]
+                        return new_state, [PIF_BACK(target=old_state.father, sender=old_state.pid, children=True)]
                     else:
                         print(f"Process {old_state.pid} is the root and has completed the PIF algorithm.")
                 return new_state, []

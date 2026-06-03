@@ -22,11 +22,12 @@ json = [
 
 [project.scripts]
 run-hw1_PIF = "hw1_PIF.run_hw1_PIF:main"
+run-hw2_cutVert = "hw2_cutVert.run_hw2_cutVert:main"
 
 [build-system]
 requires = ["uv_build>=0.9.28,<0.10.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = ["hw1_PIF"]
+module-name = ["hw1_PIF", "hw2_cutVert"]
 
