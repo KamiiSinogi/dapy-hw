@@ -1,21 +1,13 @@
-"""
-Simulation runner for the broadcast algorithm
-
-Run with: uv run run-bcast
-Or: uv run python -m broadcast.run_bcast
-"""
-
 from pathlib import Path
 
-from dapy.core import Asynchronous, Pid, Ring, System
+from dapy.core import Asynchronous, Pid, System
+from dapy.core import Ring, CompleteGraph, Star
 from dapy.sim import Settings, Simulator
 
-from .algo.algorithm import BroadcastAlgorithm, Start
+from .hw1_PIF import PIF_Algorithm, PIF_START
 
 
 def main() -> None:
-    """Run the broadcast algorithm simulation."""
-
     # 1. Create the system with its topology and synchrony.
     system = System(
         topology=Ring.of_size(5),
@@ -30,7 +22,7 @@ def main() -> None:
     print()
 
     # 2. Instantiate the algorithm
-    algorithm = BroadcastAlgorithm(system)
+    algorithm = PIF_Algorithm(system)
     print(f"Algorithm: {algorithm.name}")
     print()
 
@@ -43,7 +35,7 @@ def main() -> None:
 
     # 5. Create and schedule the initial event that starts the broadcast from process p1
     initiator = Pid(1)
-    initial_event = Start(target=initiator)
+    initial_event = PIF_START(target=initiator)
 
     print(f"Initiating broadcast from process {initiator}")
     sim.schedule(event=initial_event)
@@ -61,7 +53,7 @@ def main() -> None:
     # 7. Optionally, save the trace to a file for later visualization
     traces_dir = Path("traces")
     traces_dir.mkdir(exist_ok=True)
-    trace_file = traces_dir / "broadcast_trace.pkl"
+    trace_file = traces_dir / "PIF_trace.pkl"
 
     with open(trace_file, "wb") as f:
         assert sim.trace is not None

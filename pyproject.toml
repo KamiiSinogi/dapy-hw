@@ -21,15 +21,12 @@ json = [
 ]
 
 [project.scripts]
-# Add your own CLI entry points here (e.g., run-my-algo)
-run-bcast = "broadcast.run_bcast:main"
-run-my-algo = "my_algo.run_my_algo:main"
+run-hw1_PIF = "hw1_PIF.run_hw1_PIF:main"
 
 [build-system]
 requires = ["uv_build>=0.9.28,<0.10.0"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-# If you rename or add top-level packages under src/, update this list
-module-name = ["broadcast", "my_algo"]
+module-name = ["hw1_PIF"]
 
