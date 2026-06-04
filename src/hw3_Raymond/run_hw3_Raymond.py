@@ -6,7 +6,7 @@ from dapy.core import Ring, CompleteGraph, Star
 from dapy.core.topology import NetworkTopology
 from dapy.sim import Settings, Simulator
 
-from .hw1_PIF import PIF_Algorithm, PIF_START
+from .hw3_Raymond import CV_Algorithm, CV_START
 
 @dataclass(frozen=True)
 class CustomTopology(NetworkTopology):
@@ -25,13 +25,13 @@ class CustomTopology(NetworkTopology):
             adj[Pid(i)].add(Pid(j))
             adj[Pid(j)].add(Pid(i))
         return cls(adjacency={node: ProcessSet(edge) for node, edge in adj.items()})
-
+    
 
 def main() -> None:
     # 1. Create the system with its topology and synchrony.
     system = System(
         topology = CustomTopology.from_edges(n=12,
-             edges=[(1,2), (2,3), (2,4), (1,5), (5,6), (5,7), (4,9), (4,12), (9,12),
+             edges=[(1,2), (2,3), (2,4), (1,5), (5,6), (5,7), #(4,9), (4,12), (9,12),
                     (6,7), (6,8), (7,8), (8,9), (1,10), (10,11), (11,12)]),
         synchrony=Asynchronous())
 
@@ -46,7 +46,7 @@ def main() -> None:
     print()
 
     # 2. Instantiate the algorithm
-    algorithm = PIF_Algorithm(system)
+    algorithm = CV_Algorithm(system)
     print(f"Algorithm: {algorithm.name}")
     print()
 
@@ -59,7 +59,7 @@ def main() -> None:
 
     # 5. Create and schedule the initial event that starts the broadcast from process p1
     initiator = Pid(1)
-    initial_event = PIF_START(target=initiator)
+    initial_event = CV_START(target=initiator)
 
     print(f"Initiating broadcast from process {initiator}")
     sim.schedule(event=initial_event)
@@ -77,7 +77,7 @@ def main() -> None:
     # 7. Optionally, save the trace to a file for later visualization
     traces_dir = Path("traces")
     traces_dir.mkdir(exist_ok=True)
-    trace_file = traces_dir / "PIF_trace.pkl"
+    trace_file = traces_dir / "cutVert_trace.pkl"
 
     with open(trace_file, "wb") as f:
         assert sim.trace is not None

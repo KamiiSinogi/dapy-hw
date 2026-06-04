@@ -6,7 +6,7 @@ from dapy.core import ProcessSet
 
 @dataclass(frozen=True)
 class PIF_State(State):
-    father: Pid | None = None
+    parent: Pid | None = None
     children: set[Pid] = field(default_factory=set)
     neighbors: ProcessSet = field(default_factory=ProcessSet)
     count_back: int = 0
@@ -35,7 +35,7 @@ class PIF_Algorithm(Algorithm[PIF_State]):
         neighbor_set = self.system.topology.neighbors_of(pid)
         return PIF_State(
             pid = pid,
-            father = pid if pid==Pid(1) else None,
+            parent = pid if pid==Pid(1) else None,
             children = set(),
             neighbors = neighbor_set,
             count_back = len(neighbor_set))
@@ -48,9 +48,10 @@ class PIF_Algorithm(Algorithm[PIF_State]):
                 return old_state, events
             
             case PIF_GO(_, sender):
-                if old_state.father is not None:
+                if old_state.parent is not None:
                     return old_state, [PIF_BACK(target=sender, sender=old_state.pid, children=False)]
-                new_state = old_state.cloned_with(father=sender)
+                print(f"Process {old_state.pid} received PIF_GO from {sender}.")
+                new_state = old_state.cloned_with(parent=sender)
                 events = [PIF_GO(target=node, sender=old_state.pid) 
                     for node in old_state.neighbors]
                 return new_state, events
@@ -65,8 +66,8 @@ class PIF_Algorithm(Algorithm[PIF_State]):
                     children = new_children,
                     count_back = new_count_back)
                 if new_count_back == 0:
-                    if old_state.father != old_state.pid:
-                        return new_state, [PIF_BACK(target=old_state.father, sender=old_state.pid, children=True)]
+                    if old_state.parent != old_state.pid:
+                        return new_state, [PIF_BACK(target=old_state.parent, sender=old_state.pid, children=True)]
                     else:
                         print(f"Process {old_state.pid} is the root and has completed the PIF algorithm.")
                 return new_state, []
